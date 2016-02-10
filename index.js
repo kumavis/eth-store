@@ -84,7 +84,8 @@ EthereumStore.prototype._updateAccountForBlock = function(block, address, cb) {
   self._query.getAccount(address, block, function(err, result){
     if (err) return cb(err)
     result.address = address
-    accountsState[address] = result
+    // dont populate if the entry has been removed
+    if (accountsState[address]) accountsState[address] = result
     cb(null, result)
   })
 }
@@ -102,7 +103,8 @@ EthereumStore.prototype._updateTransaction = function(block, txHash, cb) {
   var transactionsState = self._currentState.transactions
   self._query.getTransaction(txHash, function(err, result){
     if (err) return cb(err)
-    transactionsState[txHash] = result
+    // dont populate if the entry has been removed
+    if (transactionsState[txHash]) transactionsState[txHash] = result
     cb(null, result)
   })
 }
