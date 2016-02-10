@@ -1,0 +1,17 @@
+{
+  "name": "eth-store",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.5.2",
+    "clone": "^1.0.2",
+    "web3-provider-engine": "^5.1.0",
+    "xtend": "^4.0.1"
+  }
+}
