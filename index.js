@@ -32,6 +32,7 @@ EthereumStore.prototype.getState = function(){
 EthereumStore.prototype.addAccount = function(address){
   const self = this
   self._currentState.accounts[address] = {}
+  self._didUpdate()
   if (!self.currentBlockNumber) return
   self._updateAccountForBlock(self.currentBlockNumber, address, noop)
 }
@@ -39,11 +40,13 @@ EthereumStore.prototype.addAccount = function(address){
 EthereumStore.prototype.removeAccount = function(address){
   const self = this
   delete self._currentState.accounts[address]
+  self._didUpdate()
 }
 
 EthereumStore.prototype.addTransaction = function(txHash){
   const self = this
   self._currentState.transactions[txHash] = {}
+  self._didUpdate()
   if (!self.currentBlockNumber) return
   self._updateTransaction(self.currentBlockNumber, txHash, noop)
 }
@@ -51,12 +54,19 @@ EthereumStore.prototype.addTransaction = function(txHash){
 EthereumStore.prototype.removeTransaction = function(address){
   const self = this
   delete self._currentState.transactions[address]
+  self._didUpdate()
 }
 
 
 //
 // private
 //
+
+EthereumStore.prototype._didUpdate = function() {
+  const self = this
+  var state = self.getState()
+  self.emit('update', state)
+}
 
 EthereumStore.prototype._updateForBlock = function(block) {
   const self = this
@@ -84,8 +94,11 @@ EthereumStore.prototype._updateAccountForBlock = function(block, address, cb) {
   self._query.getAccount(address, block, function(err, result){
     if (err) return cb(err)
     result.address = address
-    // dont populate if the entry has been removed
-    if (accountsState[address]) accountsState[address] = result
+    // only populate if the entry is still present
+    if (accountsState[address]) {
+      accountsState[address] = result
+      self._didUpdate()
+    }
     cb(null, result)
   })
 }
@@ -103,8 +116,11 @@ EthereumStore.prototype._updateTransaction = function(block, txHash, cb) {
   var transactionsState = self._currentState.transactions
   self._query.getTransaction(txHash, function(err, result){
     if (err) return cb(err)
-    // dont populate if the entry has been removed
-    if (transactionsState[txHash]) transactionsState[txHash] = result
+    // only populate if the entry is still present
+    if (transactionsState[txHash]) {
+      transactionsState[txHash] = result
+      self._didUpdate()
+    }
     cb(null, result)
   })
 }
