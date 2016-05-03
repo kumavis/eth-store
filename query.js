@@ -1,5 +1,6 @@
 const extend = require('xtend')
 const async = require('async')
+const ethUtil = require('ethereumjs-util')
 
 module.exports = EthQuery
 
@@ -21,7 +22,72 @@ EthQuery.prototype.getAccount = function(address, block, cb){
   }, cb)
 }
 
+EthQuery.prototype.getBlockByHashWithUncles = function(blockHash, cb){
+  const self = this
+  self.getBlockByHash(blockHash, function(err, block){
+    if (err) return cb(err)
+    if (!block) return cb(null, null)
+    var count = block.uncles.length
+    async.times(count, function(index, cb){
+      self.getUncleByBlockHashAndIndex(blockHash, ethUtil.intToHex(index), cb)
+    }, function(err, uncles){
+      if (err) return cb(err)
+      block.uncles = uncles
+      cb(null, block)
+    })
+  })
+}
+
+EthQuery.prototype.getBlockByNumberWithUncles = function(blockNumber, cb){
+  const self = this
+  self.getBlockByNumber(blockNumber, function(err, block){
+    if (err) return cb(err)
+    if (!block) return cb(null, null)
+    var count = block.uncles.length
+    async.times(count, function(index, cb){
+      self.getUncleByBlockHashAndIndex(block.hash, ethUtil.intToHex(index), cb)
+    }, function(err, uncles){
+      if (err) return cb(err)
+      block.uncles = uncles
+      cb(null, block)
+    })
+  })
+}
+
+
 // rpc level
+
+EthQuery.prototype.getBlockByNumber = function(blockNumber, cb){
+  const self = this
+  self.sendAsync({
+    method: 'eth_getBlockByNumber',
+    params: [blockNumber, true],
+  }, cb)
+}
+
+EthQuery.prototype.getBlockByHash = function(blockHash, cb){
+  const self = this
+  self.sendAsync({
+    method: 'eth_getBlockByHash',
+    params: [blockHash, true],
+  }, cb)
+}
+
+EthQuery.prototype.getUncleCountByBlockHash = function(blockHash, cb){
+  const self = this
+  self.sendAsync({
+    method: 'eth_getUncleCountByBlockHash',
+    params: [blockHash],
+  }, cb)
+}
+
+EthQuery.prototype.getUncleByBlockHashAndIndex = function(blockHash, index, cb){
+  const self = this
+  self.sendAsync({
+    method: 'eth_getUncleByBlockHashAndIndex',
+    params: [blockHash, index],
+  }, cb)
+}
 
 EthQuery.prototype.getTransaction = function(txHash, cb){
   const self = this
@@ -66,6 +132,7 @@ EthQuery.prototype.sendAsync = function(opts, cb){
   self.currentProvider.sendAsync(createPayload(opts), function(err, response){
     err = err || response.error
     if (err) return cb(err)
+    // console.log(opts, response)
     cb(null, response.result)
   })
 }

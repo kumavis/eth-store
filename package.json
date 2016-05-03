@@ -11,6 +11,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "clone": "^1.0.2",
+    "ethereumjs-util": "^4.4.0",
     "web3-provider-engine": "^5.1.0",
     "xtend": "^4.0.1"
   }
