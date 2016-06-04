@@ -14,7 +14,6 @@ function EthQuery(provider){
 
 EthQuery.prototype.getAccount = function(address, block, cb){
   const self = this
-  block = block || 'latest'
   async.parallel({
     balance: self.getBalance.bind(self, address, block),
     nonce: self.getNonce.bind(self, address, block),
@@ -54,6 +53,19 @@ EthQuery.prototype.getBlockByNumberWithUncles = function(blockNumber, cb){
   })
 }
 
+
+EthQuery.prototype.getLatestBlockNumber = function(cb){
+  const self = this
+  self.getLatestBlock(function(err, result){
+    if (err) return cb(err)
+    cb(null, result.number)
+  })
+}
+
+EthQuery.prototype.getLatestBlock = function(cb){
+  const self = this
+  self.getBlockByNumber('latest', cb)
+}
 
 // rpc level
 
@@ -99,7 +111,6 @@ EthQuery.prototype.getTransaction = function(txHash, cb){
 
 EthQuery.prototype.getBalance = function(address, block, cb){
   const self = this
-  block = block || 'latest'
   self.sendAsync({
     method: 'eth_getBalance',
     params: [address, block],
@@ -108,7 +119,6 @@ EthQuery.prototype.getBalance = function(address, block, cb){
 
 EthQuery.prototype.getNonce = function(address, block, cb){
   const self = this
-  block = block || 'latest'
   self.sendAsync({
     method: 'eth_getTransactionCount',
     params: [address, block],
@@ -117,7 +127,6 @@ EthQuery.prototype.getNonce = function(address, block, cb){
 
 EthQuery.prototype.getCode = function(address, block, cb){
   const self = this
-  block = block || 'latest'
   self.sendAsync({
     method: 'eth_getCode',
     params: [address, block],
