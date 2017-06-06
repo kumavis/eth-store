@@ -111,6 +111,10 @@ EthQuery.prototype.getTransaction = function(txHash, cb){
 
 EthQuery.prototype.getBalance = function(address, block, cb){
   const self = this
+  if (arguments.length === 2) {
+    cb = arguments[1]
+    block = 'latest'
+  }
   self.sendAsync({
     method: 'eth_getBalance',
     params: [address, block],
@@ -137,7 +141,6 @@ EthQuery.prototype.getCode = function(address, block, cb){
 
 EthQuery.prototype.sendAsync = function(opts, cb){
   const self = this
-  // console.log('sendAsync:', opts)
   self.currentProvider.sendAsync(createPayload(opts), function(err, response){
     err = err || response.error
     if (err) return cb(err)
