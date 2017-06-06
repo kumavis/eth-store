@@ -25,6 +25,7 @@ function EthereumStore(blockTracker, provider) {
   this.query = (new EthQuery(provider))
   // TODO: never run more than one _updateForBlock at a time
   blockTracker.on('block', this._updateForBlock.bind(this))
+  this._blockTracker = blockTracker
 }
 
 //
@@ -89,6 +90,11 @@ EthereumStore.prototype._updateForBlock = function(block) {
 // TODO: should lock to specified block
 EthereumStore.prototype._fetchUpdate = function(key, payload, cb){
   cb = cb || noop
+  // payload can be a fn - if so, allow to be dynamic
+  if (typeof payload === 'function') {
+    const currentBlock = this._blockTracker.getCurrentBlock()
+    payload = payload(currentBlock)
+  }
   this.query.sendAsync(payload, (err, result) => {
     if (err) return cb(err)
     this._currentState[key] = result
