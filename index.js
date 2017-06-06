@@ -52,6 +52,16 @@ EthereumStore.prototype.del = function(key){
   this._didUpdate()
 }
 
+EthereumStore.prototype.clear = function(){
+  this._subscriptions = {}
+  this._currentState = {}
+  this._didUpdate()
+}
+
+EthereumStore.prototype.subscribe = function(handler){
+  this.on('update', handler)
+}
+
 
 //
 // private
