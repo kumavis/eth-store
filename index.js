@@ -95,6 +95,7 @@ EthereumStore.prototype._fetchUpdate = function(key, payload, cb){
     const currentBlock = this._blockTracker.getCurrentBlock()
     payload = payload(currentBlock)
   }
+  if (!payload) return cb()
   this.query.sendAsync(payload, (err, result) => {
     if (err) return cb(err)
     this._currentState[key] = result
